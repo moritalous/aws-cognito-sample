@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+	<title>認証</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<script src="js/jsbn.js"></script>
+	<script src="js/jsbn2.js"></script>
+	<script src="js/sjcl.js"></script>
+	<script src="js/moment.min.js"></script>
+	<script src="js/aws-cognito-sdk.min.js"></script>
+	<script src="js/amazon-cognito-identity.min.js"></script>
+	<script src="js/aws-sdk.min.js"></script>
+
+	<script>
+        AWSCognito.config.region = 'us-east-1'; //This is required to derive the endpoint
+        var poolData = {
+            UserPoolId: 'us-east-1_2Ubqw8Mjy',
+            ClientId: '2vthoem9hri1q8ubc8uojdo7oe'
+        };
+        var userPool = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserPool(poolData);
+
+        document.addEventListener("DOMContentLoaded", function(eve) {
+
+            var verificationBtn = document.getElementById("verification");
+            verificationBtn.addEventListener("click", function(eve) {
+
+                var codeInput = document.getElementById("code");
+                var usernameInput = document.getElementById("username");
+
+                var userData = {
+                    Username: usernameInput.value,
+                    Pool: userPool
+                };
+
+                var cognitoUser = new AWSCognito.CognitoIdentityServiceProvider.CognitoUser(userData);
+
+                cognitoUser.confirmRegistration(codeInput.value, true, function(err, result) {
+                    if (err) {
+                        alert(err);
+                        return;
+                    }
+                    alert('call result: ' + result);
+                    console.log('call result: ' + result);
+                });
+            }, false);
+        }, false);
+    </script>
+</head>
+
+<body>
+	<div>
+		ユーザー名
+		<input type="text" id="username" name="username" value="">
+	</div>
+	<p>
+		認証コード
+		<input type="text" id="code" name="code" value="">
+	</p>
+	<p>
+		<input type="button" id="verification" name="verification" value="verification">
+	</p>
+</body>
+
+</html>

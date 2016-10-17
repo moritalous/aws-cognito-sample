@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+	<title>チェック</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<script src="js/jsbn.js"></script>
+	<script src="js/jsbn2.js"></script>
+	<script src="js/sjcl.js"></script>
+	<script src="js/moment.min.js"></script>
+	<script src="js/aws-cognito-sdk.min.js"></script>
+	<script src="js/amazon-cognito-identity.min.js"></script>
+	<script src="js/aws-sdk.min.js"></script>
+
+	<script>
+        AWSCognito.config.region = 'us-east-1'; //This is required to derive the endpoint
+        var poolData = {
+            UserPoolId: 'us-east-1_2Ubqw8Mjy',
+            ClientId: '2vthoem9hri1q8ubc8uojdo7oe'
+        };
+        var userPool = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserPool(poolData);
+
+        document.addEventListener("DOMContentLoaded", function(eve) {
+            var checkBtn = document.getElementById("check");
+            checkBtn.addEventListener("click", function(eve) {
+
+                var cognitoUser = userPool.getCurrentUser();
+
+                if (cognitoUser != null) {
+                    cognitoUser.getSession(function(err, session) {
+                        if (err) {
+                            alert(err);
+                            return;
+                        }
+
+                        console.log('session validity: ' + session.isValid());
+
+                        console.log('user name is ' + cognitoUser.getUsername());
+                        alert('user name is ' + cognitoUser.getUsername());
+
+                        cognitoUser.getUserAttributes(function(err, result) {
+                            if (err) {
+                                alert(err);
+                                return;
+                            }
+
+                            var message = "";
+                            for (i = 0; i < result.length; i++) {
+                                message = message + 'attribute ' + result[i].getName() + ' has value ' + result[i].getValue() + '\r\n';
+                            }
+                            alert(message);
+                        });
+                    });
+                } else {
+                    alert('サインアウトされてます。');
+                }
+            }, false);
+
+            var signoutBtn = document.getElementById("signout");
+            signoutBtn.addEventListener("click", function(eve) {
+
+                var cognitoUser = userPool.getCurrentUser();
+
+                if (cognitoUser != null) {
+                    cognitoUser.signOut();
+
+                    alert('サインアウトしました。');
+                }
+            }, false);
+        }, false);
+    </script>
+</head>
+
+<body>
+	<p>
+		<input type="button" id="check" name="check" value="check">
+	</p>
+	<p>
+		<input type="button" id="signout" name="signout" value="signout">
+	</p>
+</body>
+
+</html>

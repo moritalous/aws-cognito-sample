@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+	<title>サインイン</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!--<link href="css/style.css" rel="stylesheet">-->
+
+	<script src="js/jsbn.js"></script>
+	<script src="js/jsbn2.js"></script>
+	<script src="js/sjcl.js"></script>
+	<script src="js/moment.min.js"></script>
+	<script src="js/aws-cognito-sdk.min.js"></script>
+	<script src="js/amazon-cognito-identity.min.js"></script>
+	<script src="js/aws-sdk.min.js"></script>
+
+	<script>
+        AWSCognito.config.region = 'us-east-1'; //This is required to derive the endpoint
+        var poolData = {
+            UserPoolId: 'us-east-1_2Ubqw8Mjy',
+            ClientId: '2vthoem9hri1q8ubc8uojdo7oe'
+        };
+        var userPool = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserPool(poolData);
+
+        document.addEventListener("DOMContentLoaded", function(eve) {
+            var submitBtn = document.getElementById("submit");
+            submitBtn.addEventListener("click", function(eve) {
+
+                var usernameInput = document.getElementById("username");
+                var passwordInput = document.getElementById("password");
+
+                var userData = {
+                    Username: usernameInput.value, // your username here
+                    Pool: userPool
+                };
+
+                var authenticationData = {
+                    Username: usernameInput.value, // your username here
+                    Password: passwordInput.value, // your password here
+                };
+                var authenticationDetails =
+                    new AWSCognito.CognitoIdentityServiceProvider.AuthenticationDetails(authenticationData);
+
+                var cognitoUser =
+                    new AWSCognito.CognitoIdentityServiceProvider.CognitoUser(userData);
+                cognitoUser.authenticateUser(authenticationDetails, {
+                    onSuccess: function(result) {
+                        alert('access token + ' + result.getAccessToken().getJwtToken());
+                        console.log('access token + ' + result.getAccessToken().getJwtToken());
+                    },
+
+                    onFailure: function(err) {
+                        alert(err);
+                    },
+                    mfaRequired: function(codeDeliveryDetails) {
+                        var verificationCode = prompt('Please input verification code', '');
+                        cognitoUser.sendMFACode(verificationCode, this);
+                    }
+                });
+
+
+            }, false);
+        }, false);
+    </script>
+</head>
+
+<body>
+	<div>
+		ユーザー名
+		<input type="text" id="username" name="username" value="">
+	</div>
+	<div>
+		パスワード
+		<input type="text" id="password" name="password" value="">
+	</div>
+	<div>
+		<input type="button" id="submit" name="submit" value="サインイン">
+	</div>
+</body>
+
+</html>
